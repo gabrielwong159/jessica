@@ -18,7 +18,7 @@ SENSOR = GPIO_1A
 LED = GPIO_2A
 
 
-def move_joint(x, y, z, roll, pitch, yaw):
+def move_joints(x, y, z, roll, pitch, yaw):
     joint_goal = [x, y, z, roll, pitch, yaw]
     group.go(joint_goal, wait=True)
     group.stop()
@@ -51,7 +51,43 @@ def move_pose(position, orientation):
     return pose_goal
 
 
+def change_position(x=None, y=None, z=None):
+    # change only (x, y, z) while maintaining tool orientation
+    pose = group.get_pose().pose
+
+    if x is not None:
+        pose.position.x = x
+    if y is not None:
+        pose.position.y = y
+    if z is not None:
+        pose.position.z = z
+    
+    group.set_pose_target(pose)
+    group.go(wait=True)
+    group.stop()
+    group.clear_pose_targets()
+    return pose
+
+
+def change_orientation(roll, pitch, yaw):
+    # change only (roll, pitch, yaw) while maintaining object position
+    x, y, z, w = quaternion_from_euler(roll, pitch, yaw)
+    
+    pose = group.get_pose().pose
+    pose.orientation.x = x
+    pose.orientation.y = y
+    pose.orientation.z = z
+    pose.orientation.w = w
+
+    group.set_pose_target(pose)
+    group.go(wait=True)
+    group.stop()
+    group.clear_pose_targets()
+    return pose_goal
+
+
 def shift_z(dz):
+    # vertical movement only, by delta instead
     pose = group.get_current_pose().pose
     pose.position.z += dz
 
@@ -61,37 +97,66 @@ def shift_z(dz):
     group.clear_pose_targets()
 
 
+def move_waypoints(waypoints):
+    # ref: http://docs.ros.org/hydro/api/pr2_moveit_tutorials/html/planning/scripts/doc/move_group_python_interface_tutorial.html#cartesian-paths
+    # i guess send waypoints as a list of (x, y, z, roll, pitch, yaw) tuples?
+    goal = []
+    for x, y, z, roll, pitch, yaw in waypoints:
+        pose = geometry_msgs.msg.Pose()
+
+        pose.position.x = x
+        pose.position.y = y
+        pose.position.z = z
+
+        x, y, z, w = quaternion_from_euler(roll, pitch, yaw)
+        pose.orientation.x = x
+        pose.orientation.y = y
+        pose.orientation.z = z
+        pose.orientation.w = w
+
+        goal.append(pose)
+    
+    plan, _ = group.compute_cartesian_path(goal, 0.01, 0.0)
+    group.execute(plan, wait=True)
+    group.stop()
+    group.clear_pose_targets()
+    
+
 def home():
-    move_joint(0, 0, -1.162, 0.144, 1.157, 0)
+    move_joints(0, 0, -1.162, 0.144, 1.157, 0)
 
 
 def zero():
-    move_joint(0, 0, 0, 0, 0, 0)
+    move_joints(0, 0, 0, 0, 0, 0)
 
 
-def coffee():
-    rospy.sleep(1)
-    # home()
-    zero()
-    # grab a cup
-    move_pose((-0.005, 0.24, 0.295), (0, 0, 1.735))
-    rospy.sleep(0.5)
-    n.close_gripper(TOOL_GRIPPER_1_ID, 1000)
-    move_pose((0.036, 0.217, 0.192), (0, 0, 1.735))
-    return
-    shift_z(-0.15)
-    # return cup
-    home()
-    move_joint(1.176, 0.029, -0.641, 1.345, 1.295, -0.901)
-    move_pose((0.297, 0.011, 0.285), (0, 0, 0))
-    shift_z(-0.015)
-    n.open_gripper(TOOL_GRIPPER_1_ID, 1000)
+def load_cup():
+    # grab cup, place under machine
+    pass
 
+
+def load_capsule():
+    # grab capsule, drop into machine
+    pass
+
+
+def serve_cup():
+    # grab cup from machine, place on pedestal
+    pass
+
+
+def main():
     zero()
     home()
+    move_waypoints([
+        (0.226, 0.159, 0.268, 0, 0, 0),
+        (0.138, 0.229, 0.243, 0, 0, 0),
+        (0.079, 0.242, 0.202, 0, 0, 0),
+        (-0.02, 0.201, 0.131, 0, 0, 0),
+    ])
 
 
 if __name__ == '__main__':
     # n.calibrate_manual()
-    n.change_tool(TOOL_GRIPPER_1_ID)
-    coffee()
+    # n.change_tool(TOOL_GRIPPER_1_ID)
+    main()
