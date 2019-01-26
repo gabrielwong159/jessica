@@ -4,11 +4,9 @@ import moveit_commander
 import moveit_msgs
 import geometry_msgs
 from tf.transformations import quaternion_from_euler
-from niryo_one_python_api.niryo_one_api import *
-from utils.movement import *
 
 print 'Init node'
-rospy.init_node('move_group_python', anonymous=True)
+rospy.init_node('move_group_python', anonymous=True, disable_signals=True)
 
 print 'Init moveit'
 group_name = 'arm'
@@ -119,10 +117,8 @@ def move_waypoints(waypoints):
     group.stop()
     group.clear_pose_targets()
 
-
 def home():
     move_joints(0, 0, -1.162, 0.144, 1.157, 0)
-
 
 def zero():
     move_joints(0, 0, 0, 0, 0, 0)
