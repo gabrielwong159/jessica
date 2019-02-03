@@ -282,8 +282,6 @@ if __name__ == "__main__":
         print('Start loop')
         start()
         while True:
-            if not check_joints(CROUCHINGTIGER):
-                start()
             # Takes 2 seconds of the sensor being activated
             # Checks 20 times over the next 2 seconds
             trigger_time = 2
@@ -304,10 +302,16 @@ if __name__ == "__main__":
             # print("FINAL TRIGGER: ", trigger)
             time_diff = datetime.datetime.now() - latest_time
             print(str(time_diff.seconds) + " seconds since last run")
+            if time_diff.seconds//60 > 1:
+                NIRYO.activate_learning_mode(1)
+            else:
+                if not check_joints(CROUCHINGTIGER):
+                    start()
             if time_diff.seconds//60 > 20:
 		short_activate()
 		latest_time = datetime.datetime.now()
             if trigger:
+                NIRYO.activate_learning_mode(0)
                 coffee_cycle(NIRYO)
                 latest_time = datetime.datetime.now()
     elif arg=="capsule":

@@ -43,7 +43,10 @@ def crouchingtiger():
 
 @app.route('/calibrate')
 def calibrate():
+    CROUCHINGTIGER=[0, 0.428, -1.237, 0.012, 0.814, -0.046]
     NIRYO.calibrate_manual()
+    NIRYO.move_joints(CROUCHINGTIGER)
+    NIRYO.move_joints([0]*6)
     return "Calibrated"
 
 @app.route('/learning')
