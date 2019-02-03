@@ -54,5 +54,10 @@ def learning():
     NIRYO.activate_learning_mode(1)
     return "Learning Mode"
 
+@app.route('/em/<int:status>')
+def em(status):
+    NIRYO.digital_write(SW_1, status)
+    return str(status)
+
 if __name__=='__main__':
     app.run(host='0.0.0.0',port=1234,debug=True)

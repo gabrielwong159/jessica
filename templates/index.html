@@ -54,6 +54,16 @@
         Home
       </a>
     </div>
+    <div class="col s6">
+        <a id="emOn" onClick="em(1)" class="full waves-effect waves-light green darken-4 btn">
+          EM On
+        </a>
+    </div>
+    <div class="col s6">
+        <a id="emOff" onClick="em(0)" class="full waves-effect waves-light red darken-4 btn">
+          EM Off
+        </a>
+    </div>
   </div>
   <script>
     var state = "Uncalibrated"
@@ -109,6 +119,9 @@
       fetch(url).then((resp)=>{
         console.log(":)")
       })
+    }
+    function em(status) {
+      fetch(`/em/${status}`).then(resp => console.log(`em ${status}`));
     }
     function update_styles(state){
       var base_button = "full waves-effect waves-light darken-4 btn"
