@@ -11,7 +11,7 @@ def short_activate(n):
     Quick slideover of magnet (for 1 second). Necessary to activate cleaning function
     """
     n.digital_write(ELECTROMAGNET, True)
-    time.sleep(1)
+    time.sleep(0.8)
     n.digital_write(ELECTROMAGNET, False)
     return True
 
