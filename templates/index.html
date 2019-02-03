@@ -19,6 +19,7 @@
   }
   .col{
     height:20%;
+    margin-bottom: 20px;
   }
   .full{
     width:100%;
@@ -28,6 +29,21 @@
     justify-content:center;
     align-items:center;
     line-height:1em;
+  }
+  #main {
+    background-color: #f9dbbd;
+    color: #424242;
+  }
+  #main.engaged {
+    background-color: #d6bca2;
+  }
+  #calibrate {
+    background-color: #ffa5ab;
+    color: #424242;
+  }
+  #home {
+    background-color: #da627d;
+    color: #424242;
   }
 </style>
 <body>
@@ -40,39 +56,39 @@
       </div>
     </div>
     <div class="col s12">
-      <a id="main" onClick="startstop()" class="full waves-effect waves-light red darken-4 btn">
+      <a id="main" onClick="startstop()" class="full waves-effect waves-light btn"> 
         Start Arm Script
       </a>
     </div>
     <div class="col s12">
-      <a id="calibrate" onClick="calibrate()" class="full waves-effect waves-light blue darken-4 btn">
+      <a id="calibrate" onClick="calibrate()" class="full waves-effect waves-light btn">
         Calibrate Arm
       </a>
     </div>
     <div class="col s12">
-      <a id="home" onClick="home()" class="full waves-effect waves-light yellow darken-4 btn">
+      <a id="home" onClick="home()" class="full waves-effect waves-light btn">
         Home
       </a>
     </div>
     <div class="col s6">
-        <a id="emOn" onClick="em(1)" class="full waves-effect waves-light green darken-4 btn">
+        <a id="emOn" onClick="em(1)" class="full waves-effect waves-light pink darken-4 btn">
           EM On
         </a>
     </div>
     <div class="col s6">
-        <a id="emOff" onClick="em(0)" class="full waves-effect waves-light red darken-4 btn">
+        <a id="emOff" onClick="em(0)" class="full waves-effect waves-light grey darken-3 btn">
           EM Off
         </a>
     </div>
   </div>
   <script>
-    var state = "Uncalibrated"
-    update_styles(state)
+    var state = "Unengaged";
+    update_styles(state);
     function startstop(){
       var startbutton = document.getElementById("main");
       if(state == "Unengaged") {
         // GET to /main
-        var url = "/main"
+        var url = "/main";
         fetch(url).then((resp)=>{
           console.log("Started Script");
         })
@@ -82,7 +98,7 @@
       }
       else {
         // GET to /main
-        var url = "/stopmain"
+        var url = "/stopmain";
         fetch(url).then((resp)=>{
           console.log("Stopped Script");
         })
@@ -124,25 +140,25 @@
       fetch(`/em/${status}`).then(resp => console.log(`em ${status}`));
     }
     function update_styles(state){
-      var base_button = "full waves-effect waves-light darken-4 btn"
+      var base_button = "full waves-effect waves-light"
       var colorsets = {
         "Uncalibrated":{
           "main":base_button + " disabled",
-          "calibrate":base_button + " red",
+          "calibrate":base_button,
           "home":base_button + " disabled",
         },
         "Calibrating":{
           "main":base_button + " disabled",
-          "calibrate":base_button + " green",
+          "calibrate":base_button,
           "home":base_button + " disabled",
         },
         "Unengaged":{
-          "main":base_button + " green",
-          "calibrate":base_button + " blue",
-          "home":base_button + " yellow",
+          "main":base_button,
+          "calibrate":base_button,
+          "home":base_button,
         },
         "Engaged":{
-          "main":base_button + " red",
+          "main":base_button + " engaged",
           "calibrate":base_button + " disabled",
           "home":base_button + " disabled",
         }

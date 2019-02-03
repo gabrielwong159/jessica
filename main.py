@@ -8,7 +8,7 @@
 # Activate electromagnet
 # Move cup to serving platform
 # Drop cup
-
+from __future__ import print_function
 import time
 import sys
 import datetime
@@ -230,8 +230,6 @@ def arm_script():
     print('Start loop')
     start()
     while running.bool:
-        if not check_joints(CROUCHINGTIGER):
-            start()
         # Takes 2 seconds of the sensor being activated
         # Checks 20 times over the next 2 seconds
         trigger_time = 2
@@ -251,7 +249,12 @@ def arm_script():
                     break
         time_diff = datetime.datetime.now() - latest_time
         print(str(time_diff.seconds) + " seconds since last run")
-        if time_diff.seconds//60 > 20:
+        if time_diff.seconds/60. >= 0.5:
+            NIRYO.activate_learning_mode(1)
+        else:
+            if not check_joints(CROUCHINGTIGER):
+                start()
+        if time_diff.seconds/60. > 20:
             short_activate()
 	    latest_time = datetime.datetime.now()
         if trigger:
@@ -260,9 +263,9 @@ def arm_script():
 
 
 if __name__ == "__main__":
-    print 'Init node'
+    prin('Init node')
     rospy.init_node('move_group_python', anonymous=True, disable_signals=True)
-    print 'Init moveit'
+    print('Init moveit')
     group_name = 'arm'
     group = moveit_commander.MoveGroupCommander(group_name)
 
@@ -301,13 +304,12 @@ if __name__ == "__main__":
                         break
             # print("FINAL TRIGGER: ", trigger)
             time_diff = datetime.datetime.now() - latest_time
-            print(str(time_diff.seconds) + " seconds since last run")
-            if time_diff.seconds//60 > 1:
+            if time_diff.seconds/60. >= 1:
                 NIRYO.activate_learning_mode(1)
             else:
                 if not check_joints(CROUCHINGTIGER):
                     start()
-            if time_diff.seconds//60 > 20:
+            if time_diff.seconds/60. > 20:
 		short_activate()
 		latest_time = datetime.datetime.now()
             if trigger:
