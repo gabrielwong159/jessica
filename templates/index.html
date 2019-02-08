@@ -3,65 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <title>Robo Arm Control Center</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-</head>
 
-<style>
-  html{
-    background-color:rgba(0,0,0,0.1);
-    height:100%;
-  }
-  body{
-    height:100%;
-  }
-  .row{
-    height:100%;
-  }
-  .col{
-    height:20%;
-    margin-bottom: 20px;
-  }
-  .full{
-    width:100%;
-    height:100%;
-    font-size:5rem;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    line-height:1em;
-  }
-  #main {
-    background-color: #f9dbbd;
-    color: #424242;
-  }
-  #main.engaged {
-    background-color: #d6bca2;
-  }
-  #calibrate {
-    background-color: #ffa5ab;
-    color: #424242;
-  }
-  #home {
-    background-color: #da627d;
-    color: #424242;
-  }
-</style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="/styles.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</head>
 <body>
   <div class="row">
     <div class="col s6 offset-s3" style="height:200px">
       <div class="valign-wrapper" style="height:100%">
         <p style="text-align:center; width:100%">
-          BANNER
+          JESSICA
         </p>
       </div>
     </div>
     <div class="col s12">
-      <a id="main" onClick="startstop()" class="full waves-effect waves-light btn"> 
+      <a id="main" onClick="startstop()" class="full btn"> 
         Start Arm Script
       </a>
     </div>
     <div class="col s12">
-      <a id="calibrate" onClick="calibrate()" class="full waves-effect waves-light btn">
+      <a id="calibrate" onClick="calibrate()" class="full btn">
         Calibrate Arm
       </a>
     </div>
@@ -81,97 +45,8 @@
         </a>
     </div>
   </div>
-  <script>
-    var state = "Unengaged";
-    update_styles(state);
-    function startstop(){
-      var startbutton = document.getElementById("main");
-      if(state == "Unengaged") {
-        // GET to /main
-        var url = "/main";
-        fetch(url).then((resp)=>{
-          console.log("Started Script");
-        })
-        startbutton.innerHTML = "Stop Arm Script";
-        state = "Engaged";
-        update_styles(state);
-      }
-      else {
-        // GET to /main
-        var url = "/stopmain";
-        fetch(url).then((resp)=>{
-          console.log("Stopped Script");
-        })
-        startbutton.innerHTML = "Start Arm Script";
-        state = "Unengaged";
-        update_styles(state);
-      }
-    }
-    function calibrate(){
-      var calibratebutton = document.getElementById("calibrate");
-      if(state != "Calibrating"){
-        // GET to /learningmode
-        var url = "/learning"
-        fetch(url).then((resp)=>{
-          calibratebutton.innerHTML = "Arm is in Calibrate Position?";
-          state = "Calibrating";
-          update_styles(state);
-        })
-      }
-      else if(state == "Calibrating"){
-        // GET to /calibrate
-        var url = "/calibrate"
-        fetch(url).then((resp)=>{
-          state = "Unengaged";
-          console.log(resp);
-          calibratebutton.innerHTML = "Calibrate Arm";
-          update_styles(state);
-        })
-      }
-    }
-    function home(){
-      // GET to /crouchingtiger
-      var url = "/crouchingtiger"
-      fetch(url).then((resp)=>{
-        console.log(":)")
-      })
-    }
-    function em(status) {
-      fetch(`/em/${status}`).then(resp => console.log(`em ${status}`));
-    }
-    function update_styles(state){
-      var base_button = "full waves-effect waves-light"
-      var colorsets = {
-        "Uncalibrated":{
-          "main":base_button + " disabled",
-          "calibrate":base_button,
-          "home":base_button + " disabled",
-        },
-        "Calibrating":{
-          "main":base_button + " disabled",
-          "calibrate":base_button,
-          "home":base_button + " disabled",
-        },
-        "Unengaged":{
-          "main":base_button,
-          "calibrate":base_button,
-          "home":base_button,
-        },
-        "Engaged":{
-          "main":base_button + " engaged",
-          "calibrate":base_button + " disabled",
-          "home":base_button + " disabled",
-        }
-      }
-      var keys = Object.keys(colorsets[state])
-      keys.forEach((key)=>{
-        var elem = document.getElementById(key);
-        elem.className = colorsets[state][key];
-      })
-      console.log("Styles updated for state " + state);
-      return true
-    }
-  </script>
+
+  <script type="text/javascript" src="/app.js"></script>
 </body>
 </html>
 
