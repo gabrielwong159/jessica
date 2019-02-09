@@ -17,9 +17,9 @@ import rospy
 import moveit_commander
 import moveit_msgs
 import geometry_msgs
-import running
 from tf.transformations import quaternion_from_euler
 
+import running
 from niryo_one_python_api.niryo_one_api import *
 
 group_name='arm'
