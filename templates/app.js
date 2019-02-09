@@ -43,6 +43,8 @@ async function startstop(){
 }
 
 async function calibrate() {
+  calibrateButton.toggleClass("disabled");
+
   if (state != states.calibrating) {
     let res = await get(url + "/learning");
     if (res) console.log(await res.text());
@@ -60,6 +62,7 @@ async function calibrate() {
 
   startButton.toggleClass("disabled");
   homeButton.toggleClass("disabled");
+  calibrateButton.toggleClass("disabled");
 }
 
 async function home() {
