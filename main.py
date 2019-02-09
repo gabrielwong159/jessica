@@ -263,7 +263,7 @@ def arm_script():
 
 
 if __name__ == "__main__":
-    prin('Init node')
+    print('Init node')
     rospy.init_node('move_group_python', anonymous=True, disable_signals=True)
     print('Init moveit')
     group_name = 'arm'

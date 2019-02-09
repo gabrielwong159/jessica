@@ -1,4 +1,6 @@
-from flask import Flask, render_template
+from flask import Flask, redirect
+from flask_cors import CORS
+
 import rospy
 import moveit_commander
 import moveit_msgs
@@ -10,15 +12,17 @@ import running
 running.bool = False
 
 rospy.init_node('move_group_python', anonymous=True, disable_signals=True)
-group_name='arm'
+group_name = 'arm'
 group = moveit_commander.MoveGroupCommander(group_name)
 NIRYO = NiryoOne()
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return redirect('http://10.12.175.231:8000')
+
 
 @app.route('/home')
 def home():
