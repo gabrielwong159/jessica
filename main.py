@@ -180,6 +180,7 @@ def capsule_cycle(Niryo):
 
 def move_to_cup(Niryo):
     print('move to cup')
+    home()
     move_joints([1.490, -0.368, -0.659, -0.252, 1.146, 0.056])
     Niryo.close_gripper(TOOL_GRIPPER_1_ID, 1000)
 
@@ -330,3 +331,5 @@ if __name__ == "__main__":
     elif arg == 'zero':
         NIRYO.move_joints([0]*6)
         rospy.sleep(2)
+    elif arg == 'activate':
+        short_activate()
