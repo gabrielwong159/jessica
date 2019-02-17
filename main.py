@@ -216,12 +216,12 @@ def deliver_coffee(Niryo):
     Niryo.open_gripper(TOOL_GRIPPER_1_ID, 1000)
     start()
 
-def short_activate():
+def short_activate(t=0.8):
     """ 
     Quick slideover of magnet (for 1 second). Necessary to activate cleaning function
     """
     NIRYO.digital_write(ELECTROMAGNET, True)
-    time.sleep(0.8)
+    rospy.sleep(t)
     NIRYO.digital_write(ELECTROMAGNET, False)
     return True
 
@@ -331,5 +331,5 @@ if __name__ == "__main__":
     elif arg == 'zero':
         NIRYO.move_joints([0]*6)
         rospy.sleep(2)
-    elif arg == 'activate':
-        short_activate()
+    elif arg == 'boot_coffee_machine':
+        short_activate(1.5)
