@@ -46,6 +46,14 @@ def coffee_cycle(niryo_one):
     deliver_coffee(niryo_one)
 
 
+def nowait_coffee_cycle(niryo_one):
+    start()
+    capsule_cycle(niryo_one)
+    move_to_cup(niryo_one)
+    dispense_cup(niryo_one)
+    move_cup_to_machine(niryo_one)
+    deliver_coffee(niryo_one)
+
 # MOVEMENT FUNCTIONS
 def move_joints(joint_goal):
     global group
@@ -202,7 +210,7 @@ def move_cup_to_machine(Niryo):
 def prepare_coffee(Niryo):
     print("Electromagnet On")
     NIRYO.digital_write(ELECTROMAGNET, True)
-    time.sleep(45)
+    time.sleep(60)
     NIRYO.digital_write(ELECTROMAGNET, False)
     print("Electromagnet Off")
 
@@ -332,4 +340,7 @@ if __name__ == "__main__":
         NIRYO.move_joints([0]*6)
         rospy.sleep(2)
     elif arg == 'boot_coffee_machine':
-        short_activate(1.5)
+        short_activate()
+    elif arg == 'nowait':
+        for i in range(10):
+            nowait_coffee_cycle(NIRYO)
