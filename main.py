@@ -22,11 +22,11 @@ from tf.transformations import quaternion_from_euler
 import running
 from niryo_one_python_api.niryo_one_api import *
 
-group_name='arm'
+group_name = 'arm'
 group = moveit_commander.MoveGroupCommander(group_name)
 SENSOR = GPIO_1A
 MOTOR = GPIO_2A
-ELECTROMAGNET = SW_1
+ELECTROMAGNET = GPIO_2B
 
 CROUCHINGTIGER=[0, 0.428, -1.237, 0.012, 0.814, -0.046]
 NIRYO = NiryoOne()
