@@ -1,12 +1,16 @@
 int ledPin = 13;
-int sensorPin = 8;  // input signal from Pi
+int relayOutputPin = 6;  // output signal to control relay
+int relayInputPin = 11;  // input signal from Pi to forward to relay
+int motorSensorPin = 8;  // input signal from Pi to run motor
 int enable = 3;  // motor enable pin
 int pulse = 4;  // motor rotation pin
 
 int prev = 0;  
 
 void setup() {
-  pinMode(sensorPin, INPUT_PULLUP);
+  pinMode(motorSensorPin, INPUT_PULLUP);
+  pinMode(relayInputPin, INPUT_PULLUP);
+  pinMode(relayOutputPin, OUTPUT);
   pinMode(pulse, OUTPUT);
   pinMode(enable, OUTPUT);
   pinMode(ledPin, OUTPUT);
@@ -29,7 +33,10 @@ void moveStepper(int steps){
 }
 
 void loop() {
-  int piOutput = digitalRead(sensorPin);
+  // sending HIGH makes the EM off, sending LOW makes the EM on
+  digitalWrite(relayOutputPin, !digitalRead(relayInputPin));
+  
+  int piOutput = digitalRead(motorSensorPin);
   digitalWrite(ledPin, piOutput);
 
   if (piOutput && !prev) moveStepper(200);

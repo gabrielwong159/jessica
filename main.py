@@ -32,7 +32,6 @@ CROUCHINGTIGER=[0, 0.428, -1.237, 0.012, 0.814, -0.046]
 NIRYO = NiryoOne()
 NIRYO.pin_mode(SENSOR, 1)
 NIRYO.pin_mode(MOTOR,0)
-NIRYO.digital_write(MOTOR, 1)
 NIRYO.change_tool(TOOL_GRIPPER_1_ID)
 
 # MAIN FUNCTION
@@ -196,9 +195,10 @@ def move_to_cup(Niryo):
 def dispense_cup(Niryo):
     print('dispense cup')
     Niryo.digital_write(MOTOR, 0)
-    time.sleep(0.1)
+    time.sleep(0.2)
     Niryo.digital_write(MOTOR, 1)
-    time.sleep(0.1)
+    time.sleep(0.2)
+    Niryo.digital_write(MOTOR, 0)
 
 
 def move_cup_to_machine(Niryo):
@@ -278,17 +278,7 @@ if __name__ == "__main__":
     group_name = 'arm'
     group = moveit_commander.MoveGroupCommander(group_name)
 
-    SENSOR = GPIO_1A
-    MOTOR = GPIO_2A
-    ELECTROMAGNET = SW_1
-
-    CROUCHINGTIGER=[0, 0.428, -1.237, 0.012, 0.814, -0.046]
     arg = sys.argv[1]
-    NIRYO = NiryoOne()
-    NIRYO.pin_mode(SENSOR, 1)
-    NIRYO.pin_mode(MOTOR,0)
-    NIRYO.digital_write(MOTOR, 1)
-    NIRYO.change_tool(TOOL_GRIPPER_1_ID)
     latest_time = datetime.datetime.now()
     if arg == "main":
         print('Start loop')
@@ -344,3 +334,5 @@ if __name__ == "__main__":
     elif arg == 'nowait':
         for i in range(10):
             nowait_coffee_cycle(NIRYO)
+    elif arg == 'dispense':
+        dispense_cup(NIRYO)
