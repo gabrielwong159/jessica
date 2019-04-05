@@ -278,6 +278,7 @@ def arm_script():
         if trigger:
             coffee_cycle(NIRYO)
             latest_time = datetime.datetime.now()
+#____________________________________________________IGNORE_______________________________________________________________#
 
 
 if __name__ == "__main__":
