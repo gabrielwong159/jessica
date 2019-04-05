@@ -18,7 +18,7 @@ void setup() {
   digitalWrite(enable, HIGH);
 }
 
-void moveStepper(int steps){
+void moveStepper(int steps){          // move stepper motor by the number of steps
   digitalWrite(enable, LOW);
   delay(10);
 
@@ -34,7 +34,8 @@ void moveStepper(int steps){
 
 void loop() {
   // sending HIGH makes the EM off, sending LOW makes the EM on
-  digitalWrite(relayOutputPin, !digitalRead(relayInputPin));
+  digitalWrite(relayOutputPin, !digitalRead(relayInputPin));    // flips NIRYOs commands HIGH/LOW and send LOW/HIGH to relay
+                                                                // to switch relay ON/OFF
   
   int piOutput = digitalRead(motorSensorPin);
   digitalWrite(ledPin, piOutput);
