@@ -23,37 +23,36 @@ from niryo_one_python_api.niryo_one_api import *
 
 # MoveIt stack is used because Niryo API lags in response. Even if Niryo API is used, 
 # the way it works is that it passes the values to MoveIt stack to control the arm. So might as well se MoveIt stack straight.
+print('Init node')
+rospy.init_node('move_group_python', anonymous=True, disable_signals=True)
+print('Init moveit')
+group_name = 'arm'
+group = moveit_commander.MoveGroupCommander(group_name)
 
-group_name = 'arm' 
-group = moveit_commander.MoveGroupCommander(group_name) 
-SENSOR = GPIO_1A #sensor to sense capsule
-MOTOR = GPIO_2A #stepper motor which dispenses paper cups
-ELECTROMAGNET = GPIO_2B #electromagnet is used to control the coffee machine. When the electromagnet is on, the coffee machine is signaled to make coffee.
+SENSOR = GPIO_1A  # sensor to sense capsule
+MOTOR = GPIO_2A  # stepper motor which dispenses paper cups
+ELECTROMAGNET = GPIO_2B  # electromagnet is used to control the coffee machine. When the electromagnet is on, the coffee machine is signaled to make coffee.
+TOOL = TOOL_GRIPPER_1_ID
 
-CROUCHINGTIGER=[0, 0.428, -1.237, 0.012, 0.814, -0.046] #home position
-NIRYO = NiryoOne() 
-NIRYO.pin_mode(SENSOR, 1) # 1 is input
-NIRYO.pin_mode(MOTOR,0) # 0 is output
-NIRYO.change_tool(TOOL_GRIPPER_1_ID)
+CROUCHINGTIGER = [0, 0.428, -1.237, 0.012, 0.814, -0.046]  # home position
+
+niryo = NiryoOne()
+niryo.pin_mode(SENSOR, PIN_MODE_INPUT)
+niryo.pin_mode(MOTOR, PIN_MODE_OUTPUT)
+niryo.pin_mode(ELECTROMAGNET, PIN_MODE_OUTPUT)
+niryo.change_tool(TOOL)
+
 
 # MAIN FUNCTION
-def coffee_cycle(niryo_one):				# main function
+def coffee_cycle(niryo):				# main function
     start()
-    capsule_cycle(niryo_one)
-    move_to_cup(niryo_one)
-    dispense_cup(niryo_one)
-    move_cup_to_machine(niryo_one)
-    prepare_coffee(niryo_one)
-    deliver_coffee(niryo_one)
+    capsule_cycle(niryo)
+    move_to_cup(niryo)
+    dispense_cup(niryo)
+    move_cup_to_machine(niryo)
+    prepare_coffee(niryo)
+    deliver_coffee(niryo)
 
-# for testing
-def nowait_coffee_cycle(niryo_one):			# test the whole cycle without making coffee
-    start()
-    capsule_cycle(niryo_one)
-    move_to_cup(niryo_one)
-    dispense_cup(niryo_one)
-    move_cup_to_machine(niryo_one)
-    deliver_coffee(niryo_one)
 
 # MOVEMENT FUNCTIONS
 def move_joints(joint_goal):
@@ -72,7 +71,6 @@ def move_joints(joint_goal):
                     home(niryo_api = True)
                 except NiryoOneException as e:
                     home(niryo_api = False)
-
 
 	print("new move joint done")
         group.go(joint_goal, wait=True)
@@ -105,7 +103,8 @@ def move_pose(position, orientation):
     group.clear_pose_targets()
     return pose_goal
 
-#shift pose in z direction
+
+# shift pose in z direction
 def shift_z(dz):
     # vertical movement only, by delta instead
     global group
@@ -118,7 +117,8 @@ def shift_z(dz):
     group.clear_pose_targets() #clear the object - recommended
     return pose
 
-#path planning (advised to not use it because the path planning might result in paths which breaks the hardware itself
+
+# path planning (advised to not use it because the path planning might result in paths which breaks the hardware itself
 def move_waypoints(waypoints):
     global group
     # ref: http://docs.ros.org/hydro/api/pr2_moveit_tutorials/html/planning/scripts/doc/move_group_python_interface_tutorial.html#cartesian-paths
@@ -163,6 +163,7 @@ def start(niryo_api=False):	# move from calibration position to crouching tiger 
     else:			# move using move_it to position - both positions are the same
         move_joints(CROUCHINGTIGER)
 
+
 # Return to zero positions for all joints
 def zero():			
     move_joints([0, 0, 0, 0, 0, 0])
@@ -178,110 +179,110 @@ def check_joints(joints, tolerance=0.085):
             return False
     return True
 
-#check if the difference between the current positions of the joints and the desired position is within the tolerance
-def capsule_cycle(Niryo):	# Picking up the capsule and delivering it
+
+# check if the difference between the current positions of the joints and the desired position is within the tolerance
+def capsule_cycle(niryo):	# Picking up the capsule and delivering it
     print('Capsule')
-    Niryo.open_gripper(TOOL_GRIPPER_1_ID, 1000) 		# open the gripper, 1000 is the speed of the motor
+    niryo.open_gripper(TOOL, 1000) 		                # open the gripper, 1000 is the speed of the motor
     # start of sequence of serve capsule (start from zero())
     move_joints([-0.246, -0.711, 0.013, 0.260, 0.645, -0.177])	# move to capsule pickup point
 
-    Niryo.close_gripper(TOOL_GRIPPER_1_ID, 1000)		# close. Pick up capsule
+    niryo.close_gripper(TOOL, 1000)	            	        # close. Pick up capsule
     shift_z(0.1)						# takes current location, moves in the z direction by 10cm
     move_joints([-1.516, 0.102, -0.265, -0.025, -1.069, -0.020])# waypoint
     move_joints([-1.536, -0.843, 0.881, 0.005, -1.460, -0.015])	# move to drop-off position
     
-    Niryo.open_gripper(TOOL_GRIPPER_1_ID, 1000)			# open gripper
+    niryo.open_gripper(TOOL, 1000)	            		# open gripper
     move_joints([-1.555, -0.630, 0.952, 0.020, -1.476, -0.015]) # move to... ???
 
-def move_to_cup(Niryo):						# move to pick up cup
+def move_to_cup(niryo):						# move to pick up cup
     print('move to cup')
     home()							# pass through home waypoint
     move_joints([1.490, -0.368, -0.659, -0.252, 1.146, 0.056])	# move to pick up position
-    Niryo.close_gripper(TOOL_GRIPPER_1_ID, 1000)		# close gripper and wait for cup to dispense
+    niryo.close_gripper(TOOL, 1000)		                # close gripper and wait for cup to dispense
 
 
-def dispense_cup(Niryo):					# dispense cup
+def dispense_cup(niryo):					# dispense cup
     print('dispense cup')
-    Niryo.digital_write(MOTOR, 1)				# turn on motor, 1: High, 0: Low
+    niryo.digital_write(MOTOR, 1)				# turn on motor, 1: High, 0: Low
     time.sleep(0.2)						
-    Niryo.digital_write(MOTOR, 0)				# turn off
+    niryo.digital_write(MOTOR, 0)				# turn off
 
 
-def move_cup_to_machine(Niryo):					# move cup to coffee machine
+def move_cup_to_machine(niryo):					# move cup to coffee machine
     print('move cup to machine')
     move_joints([0, 0, -1.162, 0.144, 1.157, 0])		# waypoint
     move_joints([-1.199, -0.82, -0.795, 0.828, 1.57, -0.01])	# final coffee pick up position
 
 
-def prepare_coffee(Niryo):					# prepare coffee
+def prepare_coffee(niryo):					# prepare coffee
     print("Electromagnet On")					
-    NIRYO.digital_write(ELECTROMAGNET, True)			# NIRYO sends HIGH to Arduino stepper_control code, 
+    niryo.digital_write(ELECTROMAGNET, 1)			# NIRYO sends HIGH to Arduino stepper_control code, 
 								# Arduino code flips and sends LOW to Relay, Relay switches on Electromagnet
     time.sleep(60)						# wait 60 seconds for coffee
-    NIRYO.digital_write(ELECTROMAGNET, False)			# Switch off Electromagnet
+    niryo.digital_write(ELECTROMAGNET, 0)			# Switch off Electromagnet
     print("Electromagnet Off")
 
 
-def deliver_coffee(Niryo):					# deliver coffee
+def deliver_coffee(niryo):					# deliver coffee
     print('deliver coffee')
     move_joints([-0.637, -0.769, -0.913, 0.622, 1.634, 0.03])
     move_joints([-0.685, -0.080, -0.466, 0.637, 0.577, -0.633])
     move_joints([0.047, -0.184, -0.313, 0.0, 0.525, -.046])
     move_joints([0.060, -0.445, -0.298, 0.103, 0.733, -0.121])
-    Niryo.open_gripper(TOOL_GRIPPER_1_ID, 1000)
+    niryo.open_gripper(TOOL, 1000)
     start()
 
-def short_activate(t=0.8):
+def short_activate(niryo, t=0.8):
     """ 
     Quick slideover of magnet (for 1 second). Necessary to activate cleaning function
     """
-    NIRYO.digital_write(ELECTROMAGNET, True)
+    niryo.digital_write(ELECTROMAGNET, True)
     rospy.sleep(t)
-    NIRYO.digital_write(ELECTROMAGNET, False)
+    niryo.digital_write(ELECTROMAGNET, False)
     return True
 
 
 if __name__ == "__main__":
-    print('Init node')
-    rospy.init_node('move_group_python', anonymous=True, disable_signals=True)
-    print('Init moveit')
-    group_name = 'arm'
-    group = moveit_commander.MoveGroupCommander(group_name)
-
     arg = sys.argv[1]
-    latest_time = datetime.datetime.now()
     if arg == "main":
-        print('Start loop')
+        print('Start loop')        
+        latest_time = datetime.datetime.now()
         start()
         while True:
             # Takes 2 seconds of the sensor being activated
             # Checks 20 times over the next 2 seconds
-            trigger_time = 2
+            trigger_time = 2.0
             count = 0
             check_ticks = 20
     
             # Sensor output is inverted so we have to NOT all of them(?)
-            trigger = not NIRYO.digital_read(SENSOR)
+            trigger = not niryo.digital_read(SENSOR)
             if trigger:
                 while count < trigger_time:
-                    trigger = not NIRYO.digital_read(SENSOR)
-                    print(str(count)+ '/' + str(trigger_time))
-                    time.sleep(trigger_time/float(check_ticks))
-                    count += trigger_time/float(check_ticks)
-                    if NIRYO.digital_read(SENSOR):
+                    trigger = not niryo.digital_read(SENSOR)
+                    time.sleep(trigger_time / check_ticks)
+                    
+                    count += trigger_time / check_ticks
+                    print('%.1f / %.1f' % (count, trigger_time))
+
+                    if niryo.digital_read(SENSOR):
                         trigger = False
                         break
-            # print("FINAL TRIGGER: ", trigger)
+            
             time_diff = datetime.datetime.now() - latest_time
-            if time_diff.seconds/60. >= 1:
-                NIRYO.activate_learning_mode(1)
-            else:
+
+            if time_diff.seconds / 60. >= 0.5:  # learning mode after 0.5 mins idle
+                niryo.activate_learning_mode(True)
+            else:  # otherwise maintain crouching tiger
                 if not check_joints(CROUCHINGTIGER):
                     start()
-            if time_diff.seconds/60. > 20:
+
+            if time_diff.seconds / 60. > 20:  # prevent coffee machine from sleeping
 		short_activate()
 		latest_time = datetime.datetime.now()
+
             if trigger:
-                NIRYO.activate_learning_mode(0)
-                coffee_cycle(NIRYO)
+                niryo.activate_learning_mode(False)
+                coffee_cycle(niryo)
                 latest_time = datetime.datetime.now()
