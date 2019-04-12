@@ -19,7 +19,6 @@ import moveit_msgs
 import geometry_msgs
 from tf.transformations import quaternion_from_euler
 
-import running
 from niryo_one_python_api.niryo_one_api import *
 
 # MoveIt stack is used because Niryo API lags in response. Even if Niryo API is used, 
@@ -242,45 +241,6 @@ def short_activate(t=0.8):
     return True
 
 
-#____________________________________________________IGNORE_______________________________________________________________#
-def arm_script():
-    latest_time = datetime.datetime.now()
-    print('Start loop')
-    start()
-    while running.bool:
-        # Takes 2 seconds of the sensor being activated
-        # Checks 20 times over the next 2 seconds
-        trigger_time = 2
-        count = 0
-        check_ticks = 20
-
-        # Sensor output is inverted so we have to NOT all of them(?)
-        trigger = not NIRYO.digital_read(SENSOR)
-        if trigger:
-            while count < trigger_time:
-                trigger = not NIRYO.digital_read(SENSOR)
-                print(str(count)+ '/' + str(trigger_time))
-                time.sleep(trigger_time/float(check_ticks))
-                count += trigger_time/float(check_ticks)
-                if NIRYO.digital_read(SENSOR):
-                    trigger = False
-                    break
-        time_diff = datetime.datetime.now() - latest_time
-        print(str(time_diff.seconds) + " seconds since last run")
-        if time_diff.seconds/60. >= 0.5:
-            NIRYO.activate_learning_mode(1)
-        else:
-            if not check_joints(CROUCHINGTIGER):
-                start()
-        if time_diff.seconds/60. > 20:
-            short_activate()
-	    latest_time = datetime.datetime.now()
-        if trigger:
-            coffee_cycle(NIRYO)
-            latest_time = datetime.datetime.now()
-#____________________________________________________IGNORE_______________________________________________________________#
-
-
 if __name__ == "__main__":
     print('Init node')
     rospy.init_node('move_group_python', anonymous=True, disable_signals=True)
@@ -325,24 +285,3 @@ if __name__ == "__main__":
                 NIRYO.activate_learning_mode(0)
                 coffee_cycle(NIRYO)
                 latest_time = datetime.datetime.now()
-    elif arg=="capsule":
-        start()
-        capsule_cycle(NIRYO)
-    elif arg=="coffee":
-        prepare_coffee(NIRYO)
-    elif arg=="deliver":
-        start()
-        move_pose((0.064, -0.196, 0.077), (-0.048, 0.027, -2.101))
-        deliver_coffee(NIRYO)
-    elif arg == 'start':
-        start()
-    elif arg == 'zero':
-        NIRYO.move_joints([0]*6)
-        rospy.sleep(2)
-    elif arg == 'boot_coffee_machine':
-        short_activate()
-    elif arg == 'nowait':
-        for i in range(10):
-            nowait_coffee_cycle(NIRYO)
-    elif arg == 'dispense':
-        dispense_cup(NIRYO)
